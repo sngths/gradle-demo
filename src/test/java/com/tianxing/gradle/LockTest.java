@@ -15,17 +15,25 @@ public class LockTest {
     String string = "aa";
     ReentrantLock reentrantLock = new ReentrantLock();
 
+
+
     Executor executor = Executors.newScheduledThreadPool(5);
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
 
 
 
     @Test
-    public void test(){
+    public void test() throws ExecutionException, InterruptedException {
         reentrantLock.lock();
         reentrantLock.unlock();
         synchronized (string){
+            scheduledExecutorService.submit(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
 
+                    return null;
+                }
+            }).get();
         }
     }
 
