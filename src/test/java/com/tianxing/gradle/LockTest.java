@@ -2,6 +2,7 @@ package com.tianxing.gradle;
 
 import org.junit.Test;
 
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,59 +12,93 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LockTest {
 
-    Object lock = new Object();
-    String string = "aa";
-    ReentrantLock reentrantLock = new ReentrantLock();
+    private final Object lock = new Object();
+    private String string = "aa";
+    private ReentrantLock reentrantLock = new ReentrantLock();
 
 
+    private Executor executor = Executors.newScheduledThreadPool(5);
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
 
-    Executor executor = Executors.newScheduledThreadPool(5);
-    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
 
+    private int count = 0;
 
 
     @Test
-    public void test() throws ExecutionException, InterruptedException {
-        reentrantLock.lock();
-        reentrantLock.unlock();
-        synchronized (string){
-            scheduledExecutorService.submit(new Callable<String>() {
-                @Override
-                public String call() throws Exception {
+    public void test() {
+        Thread remove = new Thread(new Task1());
+        Thread add = new Thread(new Task2());
+        remove.setDaemon(false);
+        add.setDaemon(false);
+        remove.start();
+        add.start();
 
-                    return null;
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                add.interrupt();
+                remove.interrupt();
+                System.out.println("关闭");
+            }
+        }));
+
+        for (; ; ) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+    }
+
+
+    private class Task1 implements Runnable {
+
+        @Override
+        public void run() {
+            for (; ; ) {
+                synchronized (lock) {
+                    while (count >= 100) {
+                        count = count - 100;
+                        System.out.println("减去100后:" + count);
+                    }
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        System.out.println("Task1关闭");
+                        return;
+                    }
                 }
-            }).get();
+            }
+
         }
     }
 
 
-
-    private class Result implements Future<String>{
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
+    private class Task2 implements Runnable {
+        private Random random = new Random();
+        private int r = 0;
 
         @Override
-        public boolean isCancelled() {
-            return false;
-        }
+        public void run() {
+            for (; ; ) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    System.out.println("Task2关闭");
+                    return;
+                }
+                synchronized (lock) {
+                    r = random.nextInt(300);
+                    count = count + r;
+                    System.out.println("加上" + r + "等于" + count);
+                    lock.notify();
+                }
+            }
 
-        @Override
-        public boolean isDone() {
-            return false;
-        }
-
-        @Override
-        public String get() throws InterruptedException, ExecutionException {
-            return null;
-        }
-
-        @Override
-        public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            return null;
         }
     }
+
+
 }
