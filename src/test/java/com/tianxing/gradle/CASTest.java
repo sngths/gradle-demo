@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 /**
  * Created by tianxing on 17/2/28.
@@ -90,5 +91,16 @@ public class CASTest {
         }
     }
 
+
+
+    /**
+     * 列队同步器
+     * */
+    private class queuedSynchronizer extends AbstractQueuedSynchronizer{
+
+
+
+
+    }
 
 }

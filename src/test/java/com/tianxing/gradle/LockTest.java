@@ -53,6 +53,18 @@ public class LockTest {
     }
 
 
+    @Test
+    public void test2(){
+
+        reentrantLock.lock();
+        try{
+
+        }finally {
+            reentrantLock.unlock();
+        }
+    }
+
+
     private class Task1 implements Runnable {
 
         @Override
@@ -69,7 +81,7 @@ public class LockTest {
                         System.out.println("Task1关闭");
                         return;
                     }
-                }
+                }ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>(50);
             }
 
         }
