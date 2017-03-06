@@ -25,6 +25,7 @@ repositories {
 dependencies {
     // The production code uses Guava
     compile 'com.google.guava:guava:20.0'
+    compile 'com.google.protobuf:protobuf-java:3.2.0'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
